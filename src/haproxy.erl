@@ -45,3 +45,32 @@ parse_perfdata_blob_test() ->
 	#{"backend" := "forgeapi",
 		"health" := "UP",
 		"server" := "forgeapi-i-b1a9ea6b_forgenext-app08-dev.ops.puppetlabs.net"}] = parse_perfdata_blob(Blob).
+
+filter_by_backend(Backend, List) when is_list(List) ->
+  lists:filtermap(fun(Line) -> filter_by_backend(Backend, Line) end, List);
+filter_by_backend(Target_backend, #{"backend" := Backend} = Line) when is_map(Line) ->
+  Target_backend == Backend.
+
+filter_by_backend_test() ->
+  Backend = "forgeapi",
+  % start with a list that includes both "forgeapi" and "forge" backends
+  List = [#{"backend" => "forgeapi",
+    "health" => "UP",
+    "server" => "forgeapi-i-d3a8eb09_forgenext-app05-dev.ops.puppetlabs.net"},
+  #{"backend" => "forgeapi",
+    "health" => "UP",
+    "server" => "forgeapi-i-7cd771a4_forgenext-app06-dev.ops.puppetlabs.net"},
+  #{"backend" => "forge",
+    "health" => "UP",
+    "server" => "forge-i-ef69f628_forgenext-app07-dev.ops.puppetlabs.net"},
+  #{"backend" => "forge",
+    "health" => "UP",
+    "server" => "forge-i-b1a9ea6b_forgenext-app08-dev.ops.puppetlabs.net"}],
+
+  % we should only get back the maps that have backend == forgeapi
+  [#{"backend" := "forgeapi",
+    "health" := "UP",
+    "server" := "forgeapi-i-d3a8eb09_forgenext-app05-dev.ops.puppetlabs.net"},
+  #{"backend" := "forgeapi",
+    "health" := "UP",
+    "server" := "forgeapi-i-7cd771a4_forgenext-app06-dev.ops.puppetlabs.net"}] = filter_by_backend(Backend, List).
