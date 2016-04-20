@@ -1,0 +1,2 @@
+%{"getopt": {:hex, :getopt, "0.8.2"},
+  "mix_erlang_tasks": {:hex, :mix_erlang_tasks, "0.1.0"}}
