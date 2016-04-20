@@ -74,3 +74,24 @@ filter_by_backend_test() ->
   #{"backend" := "forgeapi",
     "health" := "UP",
     "server" := "forgeapi-i-7cd771a4_forgenext-app06-dev.ops.puppetlabs.net"}] = filter_by_backend(Backend, List).
+
+% count health statuses for a given backend
+% count_by_status(ListOfMaps) -> #{down => Integer, up => Integer}
+count_by_status(List) when is_list(List) ->
+  {Up, Down} = lists:partition(fun(X) -> "UP" == maps:get("health", X) end, List),
+  #{up => length(Up), down => length(Down)}.
+
+count_by_status_test() ->
+  List = [#{"backend" => "forgeapi",
+    "health" => "DOWN",
+    "server" => "server1"},
+  #{"backend" => "forgeapi",
+    "health" => "UP",
+    "server" => "server2"},
+  #{"backend" => "forge",
+    "health" => "DOWN",
+    "server" => "server3"},
+  #{"backend" => "forge",
+    "health" => "UP",
+    "server" => "server4"}],
+  #{down := 2,up := 2} = count_by_status(List).
