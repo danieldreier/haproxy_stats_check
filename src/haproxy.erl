@@ -1,6 +1,5 @@
 -module(haproxy).
--export([parse_perfdata_line/1]).
--compile(export_all).
+-export([query_haproxy/1, count_by_status/1]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.

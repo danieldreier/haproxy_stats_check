@@ -25,12 +25,18 @@ setting(Param, Settings) ->
   {Param, Value} = lists:keyfind(Param, 1, Settings),
   Value.
 
+% the main function that actually executes the check
 run_check(Options) ->
+   % set up nagios check data structure
    StdOut = nagios:new(setting(check_name, Options)),
+
+   % query haproxy stats
    Results = case haproxy:query_haproxy(setting(url, Options)) of
      {ok, Data}      -> Data;
      {error, Reason} -> nagios:add_output("error while connecting to Icinga API: " ++ io_lib:format("~p",[Reason]), nagios:set_state(unknown, StdOut))
    end,
+
+   % compare haproxy stats to the thresholds
    Backend = setting(backend, Options),
    Counts = haproxy:count_by_status(haproxy:filter_by_backend(Backend, Results)),
    Crit_Threshold = setting(crit_threshold, Options),
@@ -38,6 +44,8 @@ run_check(Options) ->
    UpCount = maps:get(up, Counts),
    DownCount = maps:get(down, Counts),
    Status = check_status(DownCount, Crit_Threshold, Warn_Threshold),
+
+   % generate nagios-format output and exit with correct status
    StdOut1 = nagios:set_state(Status, StdOut),
    StdOut2 = nagios:add_perfdata("up", erlang:integer_to_list(UpCount), StdOut1),
    StdOut3 = nagios:add_perfdata("down", erlang:integer_to_list(DownCount), StdOut2),
@@ -46,6 +54,7 @@ run_check(Options) ->
    io:format("~s\n", [nagios:render(StdOut4)]),
    nagios:halt_with(Status).
 
+% logic for converting check counts and thresholds to check statuses
 check_status(Count, Crit_Threshold, _Warn_threshold ) when Count >= Crit_Threshold ->
   critical;
 check_status(Count, _Crit_Threshold, Warn_threshold ) when Count >= Warn_threshold ->
@@ -53,6 +62,7 @@ check_status(Count, _Crit_Threshold, Warn_threshold ) when Count >= Warn_thresho
 check_status(Count, Crit_Threshold, Warn_threshold ) when Count < Crit_Threshold, Count < Warn_threshold ->
   ok.
 
+% command line options for the resulting executable
 option_spec_list() ->
     [
      %% {Name,        ShortOpt,  LongOpt,          ArgSpec,               HelpMsg}
