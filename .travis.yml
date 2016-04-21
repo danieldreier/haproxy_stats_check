@@ -5,7 +5,7 @@ otp_release:
   - 18.2.1
 before_install:
   - gem install fpm --no-document
-  - apt-get install -y rpm
+  - sudo apt-get install -y rpm
 script:
   - mix eunit
   - make
