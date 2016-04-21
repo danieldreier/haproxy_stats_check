@@ -16,7 +16,7 @@ defmodule Haproxy_check.Mixfile do
   defp escript do
     [ main_module: :haproxy_check_cli,
       embedd_elixir: false,
-      shebang: "#! /usr/bin/env HOME=/tmp escript\n"]
+      shebang: "#! /usr/bin/env escript\n"]
   end
 
   defp deps do
