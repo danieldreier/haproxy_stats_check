@@ -17,6 +17,7 @@ main(Args) ->
   case getopt:parse(OptSpecList, Args) of
     {ok, {Options, _NonOptArgs}} ->
       % if the options parsed correctly, run the check
+      validate_settings(Options),
       run_check(Options);
     {error, {Reason, Data}} ->
       % if options parsing failed print why and the usage instructions
@@ -26,8 +27,30 @@ main(Args) ->
 
 % convenience function to get a specific setting from the settings list
 setting(Param, Settings) ->
-  {Param, Value} = lists:keyfind(Param, 1, Settings),
-  Value.
+  case lists:keyfind(Param, 1, Settings) of
+    {Param, Value} -> Value;
+    false ->
+      io:format("Error: command line parameter \"~s\" must be set ~n", [erlang:atom_to_list(Param)]),
+      erlang:halt(3)
+  end.
+
+validate_settings(Options) ->
+  Backend        = setting(backend, Options),
+  Warn_threshold = setting(warn_threshold, Options),
+  Crit_threshold = setting(crit_threshold, Options),
+  case validate_settings(Backend, Warn_threshold, Crit_threshold) of
+    ok              -> ok;
+    {error, Reason} ->
+      io:format("Error in command line parameters: ~s ~n", [Reason]),
+      erlang:halt(3)
+  end.
+
+validate_settings(Backend, _Warn_threshold, _Crit_threshold) when Backend == "" ->
+  {error, "--backend flag must be set"};
+validate_settings(_Backend, Warn_threshold, Crit_threshold) when Warn_threshold >= Crit_threshold ->
+  {error, "--backend flag must be set"};
+validate_settings(_Backend, _Warn_threshold, _Crit_threshold) ->
+  ok.
 
 % the main function that actually executes the check
 run_check(Options) ->
@@ -70,14 +93,11 @@ check_status(Count, Crit_Threshold, Warn_threshold ) when Count < Crit_Threshold
 option_spec_list() ->
     [
      %% {Name,        ShortOpt,  LongOpt,          ArgSpec,               HelpMsg}
-     {help,           undefined, "help",           undefined,             "Show the program options"},
      {check_name,     $n,        "name",           {string, "haproxy backend count"},   "Check name to display in output"},
      {url ,           $u,        "url",            {string, "http://localhost:7070/haproxy?stats;csv"}, "URL for haproxy stats CSV"},
      {warn_threshold, $w,        "warn-threshold", {integer, 1},          "warning threshold for matching servers"},
      {crit_threshold, $c,        "crit-threshold", {integer, 2},          "critical threshold for matching servers"},
-     {backend,        $b,        "backend",        string,                "haproxy backend to count servers for"},
-     {debug,          undefined, "debug",          undefined,             "Enable verbose debug output"},
-     {verbose,        $v,        "verbose",        integer,               "Verbosity level"}
+     {backend,        $b,        "backend",        string,                "haproxy backend to count servers for"}
     ].
 
 -ifdef(TEST).
@@ -90,9 +110,9 @@ check_status_test() ->
 
 test_options() ->
   % simple options data structure to simplify testing
-  [[{warn_threshold,3},
+  [{warn_threshold,3},
    {crit_threshold,11},
    {backend,"forgeapi"},
    {check_name,"haproxy backend count"},
-   {url,"http://localhost:7070/haproxy?stats;csv"}]].
+   {url,"http://localhost:7070/haproxy?stats;csv"}].
 -endif.
