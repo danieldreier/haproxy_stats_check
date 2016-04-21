@@ -64,11 +64,18 @@ mix escript.build
 To build a debian package, a Makefile is provided that uses FPM:
 ```shell
 gem install fpm
-Make
+make
 ```
 
 You will end up with a .deb file in the current directory, which should
 then be put in an apt repository.
+
+To build an RPM package, you must have the rpmbuild tool available. On OS X:
+```shell
+brew install rpm
+gem install fpm
+make
+```
 
 
 Contributing

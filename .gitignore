@@ -6,5 +6,6 @@ erl_crash.dump
 *.beam
 /doc
 *.deb
+*.rpm
 haproxy_check
 rel
