@@ -1,15 +1,29 @@
-Icinga2 Check Aggregation Check
-===============================
+HAProxy Server Count Nagios Check
+=================================
 
-Check the haproxy status URL and alert based on certain conditions.
-
-Use cases:
-- alert if fewer than X servers on backend Y are up, for a given frontend
-- alert if more than X servers on backend Y are down, for a given frontend
-
+Check the haproxy status URL and alert if there are too many unhealthy backends
 
 Usage
 -----
+
+Examples:
+
+For the "forgeapi" haproxy backend, warn if 1 or more servers are in the down
+state, and go critical if 2 or more are in the down state.
+```shell
+./haproxy_check -w 1 -c 2 --backend forgeapi
+```
+
+For the "web" haproxy backend, warn if 1 or more servers are in the down
+state, and go critical if 2 or more are in the down state.
+```shell
+./haproxy_check -w 1 -c 2 --backend web
+```
+
+For descriptions of all available options, run `./haproxy_check` without any parameters or flags.
+
+Requirements
+-----------------
 You must have an erlang 18 executable available in your path. Depending on OS:
 ```shell
 apt-get install erlang
@@ -18,10 +32,14 @@ apt-get install erlang
 brew install erlang
 ```
 
-For descriptions of all available options, run `./aggcheck` without any parameters or flags.
+Testing Instructions
+--------------------
 
-Known Limitations
------------------
+This tool includes some basic eunit test coverage, which you can run with:
+
+```shell
+mix eunit
+```
 
 Build Instructions
 ------------------
@@ -30,7 +48,7 @@ This project is written in erlang, and is built using the Mix build tool from
 the elixir ecosystem. The easiest way to get a build environment is to follow
 the install steps from http://elixir-lang.org/install.html.
 
-The build output is an erlang escript file named "aggcheck", which is a single
+The build output is an erlang escript file named "haproxy_check", which is a single
 self-contained file with all dependencies packaged inside, similar to a jar.
 
 To build the escript executable:
@@ -49,6 +67,6 @@ Make
 Contributing
 ------------
 
-This is my first useful erlang code, so there are probably a lot of
+This is my second useful erlang project, so there are probably a lot of
 opportunities for improvement. All such improvements / feedback about how I'm
 doing it wrong are welcome.
