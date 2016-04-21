@@ -17,7 +17,6 @@ main(Args) ->
   case getopt:parse(OptSpecList, Args) of
     {ok, {Options, _NonOptArgs}} ->
       % if the options parsed correctly, run the check
-      validate_settings(Options),
       run_check(Options);
     {error, {Reason, Data}} ->
       % if options parsing failed print why and the usage instructions
@@ -33,24 +32,6 @@ setting(Param, Settings) ->
       io:format("Error: command line parameter \"~s\" must be set ~n", [erlang:atom_to_list(Param)]),
       erlang:halt(3)
   end.
-
-validate_settings(Options) ->
-  Backend        = setting(backend, Options),
-  Warn_threshold = setting(warn_threshold, Options),
-  Crit_threshold = setting(crit_threshold, Options),
-  case validate_settings(Backend, Warn_threshold, Crit_threshold) of
-    ok              -> ok;
-    {error, Reason} ->
-      io:format("Error in command line parameters: ~s ~n", [Reason]),
-      erlang:halt(3)
-  end.
-
-validate_settings(Backend, _Warn_threshold, _Crit_threshold) when Backend == "" ->
-  {error, "--backend flag must be set"};
-validate_settings(_Backend, Warn_threshold, Crit_threshold) when Warn_threshold >= Crit_threshold ->
-  {error, "--backend flag must be set"};
-validate_settings(_Backend, _Warn_threshold, _Crit_threshold) ->
-  ok.
 
 % the main function that actually executes the check
 run_check(Options) ->
@@ -76,7 +57,7 @@ run_check(Options) ->
    StdOut1 = nagios:set_state(Status, StdOut),
    StdOut2 = nagios:add_perfdata("up", erlang:integer_to_list(UpCount), StdOut1),
    StdOut3 = nagios:add_perfdata("down", erlang:integer_to_list(DownCount), StdOut2),
-   Message = erlang:integer_to_list(UpCount) ++ " up, " ++ erlang:integer_to_list(DownCount) ++ " down",
+   Message = "haproxy backend \"" ++ Backend ++ "\" has " ++ erlang:integer_to_list(UpCount) ++ " up, " ++ erlang:integer_to_list(DownCount) ++ " down",
    StdOut4 = nagios:add_output(Message, StdOut3),
    io:format("~s\n", [nagios:render(StdOut4)]),
    nagios:halt_with(Status).
