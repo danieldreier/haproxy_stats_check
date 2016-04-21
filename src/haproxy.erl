@@ -3,9 +3,37 @@
 -compile(export_all).
 -include_lib("eunit/include/eunit.hrl").
 
+% start SSL processes that inets depends on because httpc client needs inets
+setup_ssl() ->
+  setup_ssl([asn1, crypto, public_key, ssl]).
+setup_ssl([]) ->
+  case inets:start() of
+    ok                             -> ok;
+    {error,{already_started,_App}} -> ok
+  end;
+setup_ssl([App|Apps]) ->
+  case application:start(App) of
+    ok                             -> ok;
+    {error,{already_started,_App}} -> ok
+  end,
+  setup_ssl(Apps),
+  ok.
+
+% make an HTTP request to the haproxy stats endpoint and return the raw results
+query_haproxy(Url) ->
+  ok = setup_ssl(),
+  Response = httpc:request(get,{Url, []}, [{connect_timeout, 1000}], [{body_format, binary}]),
+  case Response of
+    {ok, {{_, 200, _}, _, Body}} -> {ok, parse_perfdata_blob(Body)};
+    {ok, {Reason, _, _}}         -> {error, Reason};
+    {error, Reason}              -> {error, Reason}
+    end.
+
 % extract the useful data out of one line of CSV perf data
-parse_perfdata_line(Data) ->
-  case string:tokens(binary_to_list(Data), ",") of
+parse_perfdata_line(Data) when is_binary(Data) ->
+  parse_perfdata_line(binary_to_list(Data));
+parse_perfdata_line(Data) when is_list(Data) ->
+  case string:tokens(Data, ",") of
     [] -> false;
     [ "# pxname" | _ ] -> false;
     [ "stats" | _ ] -> false;
@@ -95,3 +123,7 @@ count_by_status_test() ->
     "health" => "UP",
     "server" => "server4"}],
   #{down := 2,up := 2} = count_by_status(List).
+
+% count_by_backend(Backend, List) -> #{down => Integer, up => Integer}
+count_by_backend(Backend, List) when is_list(Backend), is_list(List) ->
+  haproxy:count_by_status(haproxy:filter_by_backend(Backend, List)).

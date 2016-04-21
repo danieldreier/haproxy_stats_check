@@ -9,9 +9,9 @@ defmodule Haproxy_check.Mixfile do
      deps: deps]
   end
 
-  def application do
-    [applications: [], mod: {:haproxy_check, []}]
-  end
+#  def application do
+#    [applications: [], mod: {:haproxy, []}]
+#  end
 
   defp escript do
     [ main_module: :haproxy_check_cli,
