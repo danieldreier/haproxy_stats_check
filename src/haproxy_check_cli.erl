@@ -34,22 +34,17 @@ run_check(Options) ->
    Counts = haproxy:count_by_status(haproxy:filter_by_backend(Backend, Results)),
    Crit_Threshold = setting(crit_threshold, Options),
    Warn_Threshold = setting(warn_threshold, Options),
-   Status = check_status(Counts, Crit_Threshold, Warn_Threshold, Options),
+   UpCount = maps:get(up, Counts),
+   DownCount = maps:get(down, Counts),
+   Status = check_status(DownCount, Crit_Threshold, Warn_Threshold),
    StdOut1 = nagios:set_state(Status, StdOut),
-   UpCount = erlang:integer_to_list(maps:get(up, Counts)),
-   DownCount = erlang:integer_to_list(maps:get(down, Counts)),
-   StdOut2 = nagios:add_perfdata("up", UpCount, StdOut1),
-   StdOut3 = nagios:add_perfdata("down", DownCount, StdOut2),
-   Message = UpCount ++ " up, " ++ DownCount ++ " down",
+   StdOut2 = nagios:add_perfdata("up", erlang:integer_to_list(UpCount), StdOut1),
+   StdOut3 = nagios:add_perfdata("down", erlang:integer_to_list(DownCount), StdOut2),
+   Message = erlang:integer_to_list(UpCount) ++ " up, " ++ erlang:integer_to_list(DownCount) ++ " down",
    StdOut4 = nagios:add_output(Message, StdOut3),
    io:format("~s\n", [nagios:render(StdOut4)]),
    nagios:halt_with(Status).
 
-check_status(#{down := Down, up := Up}, Crit_Threshold, Warn_threshold, Options ) ->
-  case setting(state, Options) of
-    down -> check_status(Down, Crit_Threshold, Warn_threshold);
-    up   -> check_status(Up, Crit_Threshold, Warn_threshold)
-  end.
 check_status(Count, Crit_Threshold, _Warn_threshold ) when Count >= Crit_Threshold ->
   critical;
 check_status(Count, _Crit_Threshold, Warn_threshold ) when Count >= Warn_threshold ->
@@ -71,7 +66,6 @@ option_spec_list() ->
      {url ,           $u,        "url",            {string, "http://localhost:7070/haproxy?stats;csv"}, "URL for haproxy stats CSV"},
      {warn_threshold, $w,        "warn-threshold", {integer, 1},          "warning threshold for matching servers"},
      {crit_threshold, $c,        "crit-threshold", {integer, 2},          "critical threshold for matching servers"},
-     {state,          $s,        "state",          {atom, down},        "check state to test (up, down)"},
      {backend,        $b,        "backend",        string,                "haproxy backend to count servers for"},
      {debug,          undefined, "debug",          undefined,             "Enable verbose debug output"},
      {verbose,        $v,        "verbose",        integer,               "Verbosity level"}
