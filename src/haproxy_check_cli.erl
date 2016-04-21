@@ -1,8 +1,11 @@
 -module(haproxy_check_cli).
 -export([main/1,setting/2]).
 -ifdef(TEST).
+% if in test mode, include eunit unit test headers
+% and also expose run_check/1 so we can run the check from
+% the erl shell rather than just the escript executable
 -include_lib("eunit/include/eunit.hrl").
--export([test_options/1]).
+-export([test_options/0,run_check/1]).
 -endif.
 
 % main is the function that gets called with args by the CLI parser
