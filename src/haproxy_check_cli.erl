@@ -2,6 +2,7 @@
 -export([main/1,setting/2]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-export([test_options/1]).
 -endif.
 
 % main is the function that gets called with args by the CLI parser
@@ -83,4 +84,12 @@ check_status_test() ->
   warning  = check_status(1,2,1),
   critical = check_status(2,2,1),
   ok = check_status(0,1,1).
+
+test_options() ->
+  % simple options data structure to simplify testing
+  [[{warn_threshold,3},
+   {crit_threshold,11},
+   {backend,"forgeapi"},
+   {check_name,"haproxy backend count"},
+   {url,"http://localhost:7070/haproxy?stats;csv"}]].
 -endif.
