@@ -63,6 +63,9 @@ gem install fpm
 Make
 ```
 
+You will end up with a .deb file in the current directory, which should
+then be put in an apt repository.
+
 
 Contributing
 ------------
