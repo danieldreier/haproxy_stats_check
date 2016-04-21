@@ -2,6 +2,7 @@
 language: elixir
 otp_release:
   - 18.2.1
+before_install: gem install fpm --no-document
 script:
   - mix eunit
   - make
