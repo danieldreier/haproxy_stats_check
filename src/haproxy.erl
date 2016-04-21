@@ -1,5 +1,5 @@
 -module(haproxy).
--export([query_haproxy/1, count_by_status/1]).
+-export([query_haproxy/1, count_by_status/1,filter_by_backend/2]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
@@ -59,10 +59,6 @@ filter_by_backend(Target_backend, #{"backend" := Backend} = Line) when is_map(Li
 count_by_status(List) when is_list(List) ->
   {Up, Down} = lists:partition(fun(X) -> "UP" == maps:get("health", X) end, List),
   #{up => length(Up), down => length(Down)}.
-
-% count_by_backend(Backend, List) -> #{down => Integer, up => Integer}
-count_by_backend(Backend, List) when is_list(Backend), is_list(List) ->
-  haproxy:count_by_status(haproxy:filter_by_backend(Backend, List)).
 
 -ifdef(TEST).
 % eunit tests are inlined with the code to make it easier to keep them current
