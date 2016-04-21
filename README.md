@@ -1,7 +1,10 @@
 HAProxy Server Count Nagios Check
 =================================
 
-Check the haproxy status URL and alert if there are too many unhealthy backends
+Check the haproxy status URL and alert if there are too many unhealthy backends.
+
+The idea is to be able to monitor a load balancer and alert before all backends
+are down.
 
 Usage
 -----
