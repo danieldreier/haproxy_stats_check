@@ -1,6 +1,8 @@
 -module(haproxy_check_cli).
 -export([main/1,setting/2]).
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
 
 % main is the function that gets called with args by the CLI parser
 main([]) ->
@@ -29,7 +31,6 @@ run_check(Options) ->
      {ok, Data}      -> Data;
      {error, Reason} -> nagios:add_output("error while connecting to Icinga API: " ++ io_lib:format("~p",[Reason]), nagios:set_state(unknown, StdOut))
    end,
-%   Results = haproxy:query_haproxy(setting(url, Options)),
    Backend = setting(backend, Options),
    Counts = haproxy:count_by_status(haproxy:filter_by_backend(Backend, Results)),
    Crit_Threshold = setting(crit_threshold, Options),
@@ -52,12 +53,6 @@ check_status(Count, _Crit_Threshold, Warn_threshold ) when Count >= Warn_thresho
 check_status(Count, Crit_Threshold, Warn_threshold ) when Count < Crit_Threshold, Count < Warn_threshold ->
   ok.
 
-check_status_test() ->
-  critical = check_status(1,1,1),
-  warning  = check_status(1,2,1),
-  critical = check_status(2,2,1),
-  ok = check_status(0,1,1).
-
 option_spec_list() ->
     [
      %% {Name,        ShortOpt,  LongOpt,          ArgSpec,               HelpMsg}
@@ -70,3 +65,12 @@ option_spec_list() ->
      {debug,          undefined, "debug",          undefined,             "Enable verbose debug output"},
      {verbose,        $v,        "verbose",        integer,               "Verbosity level"}
     ].
+
+-ifdef(TEST).
+% eunit tests are inlined with the code to make it easier to keep them current
+check_status_test() ->
+  critical = check_status(1,1,1),
+  warning  = check_status(1,2,1),
+  critical = check_status(2,2,1),
+  ok = check_status(0,1,1).
+-endif.
