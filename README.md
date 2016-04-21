@@ -1,5 +1,6 @@
 HAProxy Server Count Nagios Check
 =================================
+[![Build Status](https://travis-ci.org/danieldreier/haproxy_stats_check.svg?branch=master)](https://travis-ci.org/danieldreier/haproxy_stats_check)
 
 Check the haproxy status URL and alert if there are too many unhealthy backends.
 
