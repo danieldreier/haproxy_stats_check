@@ -1,5 +1,5 @@
 NAME=haproxy_check
-VERSION=0.0.4
+VERSION=0.0.5
 
 .PHONY: package
 package:
