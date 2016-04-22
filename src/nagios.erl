@@ -7,7 +7,6 @@
 % not noticable, so it's better to optimize for readability by people with less
 % erlang experience.
 
-% TODO: use function heads here instead of case
 halt_with(ok)       -> halt(0);
 halt_with(warning)  -> halt(1);
 halt_with(critical) -> halt(2);

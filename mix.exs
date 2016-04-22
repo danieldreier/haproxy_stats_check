@@ -3,7 +3,7 @@ defmodule Haproxy_check.Mixfile do
 
   def project do
     [app: :haproxy_check,
-     version: "0.0.5",
+     version: "0.0.6",
      language: :erlang,
      escript: escript,
      deps: deps]

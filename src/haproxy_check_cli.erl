@@ -41,7 +41,11 @@ run_check(Options) ->
    % query haproxy stats
    Results = case haproxy:query_haproxy(setting(url, Options)) of
      {ok, Data}      -> Data;
-     {error, Reason} -> nagios:add_output("error while connecting to Icinga API: " ++ io_lib:format("~p",[Reason]), nagios:set_state(unknown, StdOut))
+     {error, Reason} ->
+                 ErrorOutput = nagios:add_output("error while connecting to haproxy: " ++ io_lib:format("~p",[Reason]), StdOut),
+                 Output = nagios:set_state(unknown, ErrorOutput),
+                 io:format("~s\n", [nagios:render(Output)]),
+                 nagios:halt_with(unknown)
    end,
 
    % compare haproxy stats to the thresholds
