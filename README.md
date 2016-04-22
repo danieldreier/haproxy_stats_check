@@ -45,6 +45,22 @@ This tool includes some basic eunit test coverage, which you can run with:
 mix eunit
 ```
 
+To run eunit tests from within the erl shell, you'll need to compile with
+the debug flag enabled so the macro preprocessor includes the tests:
+```shell
+8> c(haproxy_check_cli, {d,'TEST'}).
+{ok,haproxy_check_cli}
+9> eunit:test(haproxy_check_cli).
+  Test passed.
+ok
+10> c(haproxy, {d,'TEST'}).
+{ok,haproxy}
+11> eunit:test(haproxy).
+  All 4 tests passed.
+ok
+12>
+```
+
 Build Instructions
 ------------------
 
