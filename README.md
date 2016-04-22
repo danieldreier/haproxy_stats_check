@@ -10,6 +10,22 @@ are down.
 Usage
 -----
 
+```shell
+Usage: /usr/local/bin/haproxy_check [-n [<check_name>]] [-u [<url>]]
+                                    [-w [<warn_threshold>]]
+                                    [-c [<crit_threshold>]]
+                                    [-b <backend>]
+
+  -n, --name            Check name to display in output [default: haproxy
+                        backend count]
+  -u, --url             URL for haproxy stats CSV [default:
+                        http://localhost:7070/haproxy?stats;csv]
+  -w, --warn-threshold  warning threshold for matching servers [default: 1]
+  -c, --crit-threshold  critical threshold for matching servers [default:
+                        2]
+  -b, --backend         haproxy backend to count servers for
+```
+
 Examples:
 
 For the "forgeapi" haproxy backend, warn if 1 or more servers are in the down
